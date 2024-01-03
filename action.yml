@@ -1,23 +1,17 @@
 name: Status Report Action
 description: |
   This action provides a status report from a reusable GitHub action or workflow as a PR comment. The report
-  is upserted everytime it is published.
+  is updated in place everytime it is published.
 
 inputs:
   body:
     description: |
       The report content.
     required: true
-  title:
+  repository:
     description: |
-      The title of the report. Defaults to the name of the of the repository without the owner part.
+      The repository of the action that is publishing the report. Defaults to env.status-report-action-repository.
     required: false
-    default: ""
-  link:
-    description: |
-      Where the report header links. Defaults to the github repository invoking this action.
-    required: false
-    default: https://github.com/${{ github.repository }}
 
 outputs:
   comment-id:
@@ -27,23 +21,35 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: infer-title
-      name: Infer report title
+    - id: infer-variables
+      name: Infer variables
       shell: bash
       run: |
-        if test -z "${{ inputs.title }}"; then
-          repository_with_owner="${{ github.repository }}"
-          repository="${repository_with_owner#*/}"
+        if test -z "${{ inputs.repository }}"; then
+          repository="${{ env.status-report-action-repository }}"
         else
-          repository="${{ inputs.title }}"
+          repository="${{ inputs.repository }}"
         fi
+        
+        if test -z "${repository}"; then
+          echo "Must provide a value for the repository input"
+          exit 1
+        fi
+                
+        title="${repository#*/}"
+        link="https://github.com/${repository}"
+        
         echo "::debug::inferred repository ${repository}"
-        echo "title=${repository}" >> "${GITHUB_OUTPUT}"
+        echo "::debug::inferred title ${title}"
+        echo "::debug::inferred link ${link}"
+        echo "repository=${repository}" >> "${GITHUB_OUTPUT}"
+        echo "title=${title}" >> "${GITHUB_OUTPUT}"
+        echo "link=${link}" >> "${GITHUB_OUTPUT}"
     - id: upsert-comment
       uses: infrastructure-blocks/upsert-comment-action@v1
       with:
         body: |
-          [${{ steps.infer-title.outputs.title }}](${{ inputs.link }}) Report
+          [${{ steps.infer-variables.outputs.title }}](${{ steps.infer-variables.outputs.link }}) Report
           ---
           ${{ inputs.body }}
-        matches: '^\[${{ steps.infer-title.outputs.title }}\]\(${{ inputs.link }}\) Report'
+        matches: '^\[${{ steps.infer-variables.outputs.title }}\]\(${{ steps.infer-variables.outputs.link }}\) Report'

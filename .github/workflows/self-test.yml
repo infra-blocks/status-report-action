@@ -18,7 +18,7 @@ jobs:
       - id: composite-action
         uses: ./
         with:
-          title: self-test
+          repository: ${{ github.repository }}
           body: |
             Seems like it works.
             And supports multiline comments.
