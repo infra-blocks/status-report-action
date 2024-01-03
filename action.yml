@@ -1,20 +1,49 @@
-name: Composite action template
+name: Status Report Action
 description: |
-  This action does nothing meaningful.
+  This action provides a status report from a reusable GitHub action or workflow as a PR comment. The report
+  is upserted everytime it is published.
 
 inputs:
-  example-input:
-    description: A useless input as an example
+  body:
+    description: |
+      The report content.
     required: true
+  title:
+    description: |
+      The title of the report. Defaults to the name of the of the repository without the owner part.
+    required: false
+    default: ""
+  link:
+    description: |
+      Where the report header links. Defaults to the github repository invoking this action.
+    required: false
+    default: https://github.com/${{ github.repository }}
+
 outputs:
-  example-output:
-    description: You know it.
-    value: ${{ steps.generate-output.outputs.example-output }}
+  comment-id:
+    description: The comment ID.
+    value: ${{ steps.upsert-comment.outputs.comment-id }}
+
 runs:
   using: "composite"
   steps:
-    - run: echo "here is your input :${{ inputs.example-input }}."
+    - id: infer-title
+      name: Infer report title
       shell: bash
-    - id: generate-output
-      run: echo "example-output=here is your output"
-      shell: bash
+      run: |
+        if test -z "${{ inputs.title }}"; then
+          repository_with_owner="${{ github.repository }}"
+          repository="${repository_with_owner#*/}"
+        else
+          repository="${{ inputs.title }}"
+        fi
+        echo "::debug::inferred repository ${repository}"
+        echo "title=${repository}" >> "${GITHUB_OUTPUT}"
+    - id: upsert-comment
+      uses: infrastructure-blocks/upsert-comment-action@v1
+      with:
+        body: |
+          [${{ steps.infer-title.outputs.title }}](${{ inputs.link }}) Report
+          ---
+          ${{ inputs.body }}
+        matches: '^\[${{ steps.infer-title.outputs.title }}\]\(${{ inputs.link }}\) Report'

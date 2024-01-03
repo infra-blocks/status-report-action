@@ -1,14 +1,24 @@
 # composite-action-template
 
-Upon creating a repository from this template:
-- Remove the [trigger-update-from-template workflow](.github/workflows/trigger-update-from-template.yml)
-- Edit the action.yml to correspond to your new action
-- Edit the self-test workflow.
-- Edit this readme: this summary and the usage section.
+A simple action to provide a status report as a PR comment. The status report is edited in place on every
+update.
 
 ## Usage
 
-Describe usage of your action here.
+The defaults will infer the title and report link from the calling repository. Those options can be tweaked
+through inputs, however. See [action.yml](./action.yml).
+```yaml
+permissions:
+  pull-requests: write
+
+jobs:
+  some-job:
+    steps:
+      - uses: infrastructure-blocks/status-report-action@v1
+        with:
+          body: |
+            :+1:  **Notice**: found "${{ steps.check-labels.outputs.matched-labels }}" label, understood. Will be tagging release branch ${{ github.base_ref }} upon merge.
+```
 
 ## Development
 
