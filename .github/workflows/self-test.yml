@@ -1,7 +1,10 @@
 name: Self test
 
 on:
-  push: ~
+  pull_request: ~
+
+permissions:
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,6 +18,12 @@ jobs:
       - id: composite-action
         uses: ./
         with:
-          example-input: Hello?
+          title: self-test
+          body: |
+            Seems like it works.
+            And supports multiline comments.
+            Plus markdown:
+            - [ ] No finished
+            - [x] Finished
       - run: |
           echo ${{ steps.composite-action.outputs.example-output }}
