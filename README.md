@@ -1,6 +1,6 @@
 # status-report-action
 
-A simple action to provide a status report as a PR comment. The status report is edited in place on every
+A simple action to provide a status report as an issue comment. The status report is edited in place on every
 update.
 
 It provides a certain format and makes certain assumptions. It assumes the report is coming from an
@@ -14,11 +14,16 @@ the repository input can also be passed through the `env` context. See usage bel
 
 ### With input
 ```yaml
+name: Status Report
+
+on:
+  pull-request: ~
+
 permissions:
   pull-requests: write
 
 jobs:
-  some-job:
+  status-report:
     steps:
       - uses: infrastructure-blocks/status-report-action@v1
         with:
@@ -26,8 +31,14 @@ jobs:
           body: |
             :+1: My shitcoin is good!
 ```
+
 ### With env
 ```yaml
+name: Status Report
+
+on:
+  pull-request: ~
+
 permissions:
   pull-requests: write
 
@@ -35,7 +46,7 @@ env:
   status-report-action-repository: captain-shitcoin/shitcoin-repo
 
 jobs:
-  some-job:
+  status-report:
     steps:
       - if: ${{ 'true' == 'false' }}
         uses: infrastructure-blocks/status-report-action@v1
@@ -46,8 +57,33 @@ jobs:
         uses: infrastructure-blocks/status-report-action@v1
         with:
           body: |
-            :disappointed:  My shitcoin is not good :disappointed: 
+            :disappointed:  My shitcoin is not good :disappointed:
 ```
+
+### Explicit issue-number
+```yaml
+name: Status Report
+
+on:
+  push: ~
+
+permissions:
+  pull-requests: write
+
+jobs:
+  status-report:
+    steps:
+      # Gets the current PR associated with GITHUB_SHA
+      - id: get-current-pr
+        uses: 8BitJonny/gh-get-current-pr@2.2.0
+      - uses: infrastructure-blocks/status-report-action@v1
+        with:
+          issue-number: ${{ steps.get-current-pr.outputs.number }}
+          repository: captain-shitcoin/shitcoin-repo
+          body: |
+            :+1: My shitcoin is when there is a PR!
+```
+
 ## Development
 
 ### Releasing

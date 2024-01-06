@@ -12,7 +12,12 @@ inputs:
     description: |
       The repository of the action that is publishing the report. Defaults to env.status-report-action-repository.
     required: false
-
+  issue-number:
+    description: |
+      The issue where to post the comment. This defaults to the PR number on pull request events,
+      otherwise, it should be provided.
+    required: true
+    default: ${{ github.event.pull_request.number }}
 outputs:
   comment-id:
     description: The comment ID.
@@ -48,6 +53,7 @@ runs:
     - id: upsert-comment
       uses: infrastructure-blocks/upsert-comment-action@v1
       with:
+        issue-number: ${{ inputs.issue-number }}
         body: |
           [${{ steps.infer-variables.outputs.title }}](${{ steps.infer-variables.outputs.link }}) Report
           ---

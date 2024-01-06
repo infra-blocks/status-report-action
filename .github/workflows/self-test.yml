@@ -2,6 +2,7 @@ name: Self test
 
 on:
   pull_request: ~
+  push: ~
 
 permissions:
   pull-requests: write
@@ -10,20 +11,39 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  status-report-action-repository: ${{ github.repository }}
+
 jobs:
   self-test:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - id: composite-action
+      - if: ${{ github.event_name == 'pull_request' }}
+        id: pr-action
         uses: ./
         with:
           repository: ${{ github.repository }}
           body: |
-            Seems like it works.
-            And supports multiline comments.
-            Plus markdown:
-            - [ ] No finished
-            - [x] Finished
-      - run: |
-          echo ${{ steps.composite-action.outputs.example-output }}
+            The status:
+            - [x] PR
+            - [ ] Push
+      - if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo ${{ steps.pr-action.outputs.comment-id }}
+      - if: ${{ github.event_name == 'push' }}
+        id: get-current-pr
+        uses: 8BitJonny/gh-get-current-pr@2.2.0
+      - if: ${{ github.event_name == 'push' }}
+        id: push-action
+        uses: ./
+        with:
+          issue-number: ${{ steps.get-current-pr.outputs.number }}
+          body: |
+            The status:
+            - [ ] PR
+            - [x] Push
+      - if: ${{ github.event_name == 'push' }}
+        name: Show outputs
+        run: |
+          echo "comment ID is: ${{ steps.push-action.outputs.comment-id }}"
