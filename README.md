@@ -10,6 +10,26 @@ to the repository's code (assumed to be hosted on GitHub),
 Because the action could be invoked several times in a given workflow, depending on execution conditions,
 the repository input can also be passed through the `env` context. See usage below.
 
+## Inputs
+
+|     Name     | Required | Description                                                                                                                   |
+|:------------:|:--------:|-------------------------------------------------------------------------------------------------------------------------------|
+|     body     |   true   | The report content.                                                                                                           |
+| issue-number |  false   | The issue where to post the comment. This defaults to the PR number on pull request events, otherwise, it should be provided. |
+|  repository  |  false   | The repository of the action that is publishing the report. Defaults to ${{ env.status-report-action-repository. }}           |
+
+## Outputs
+
+|    Name    | Description                          |
+|:----------:|--------------------------------------|
+| comment-id | The comment ID of the status report. |
+
+## Permissions
+
+|     Scope     | Level | Reason                                      |
+|:-------------:|:-----:|---------------------------------------------|
+| pull-requests | write | Required to post comments on pull-requests. |
+
 ## Usage
 
 ### With input
