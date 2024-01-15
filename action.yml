@@ -8,19 +8,21 @@ inputs:
     description: |
       The report content.
     required: true
-  repository:
-    description: |
-      The repository of the action that is publishing the report. Defaults to env.status-report-action-repository.
-    required: false
   issue-number:
     description: |
       The issue where to post the comment. This defaults to the PR number on pull request events,
       otherwise, it should be provided.
-    required: true
-    default: ${{ github.event.pull_request.number }}
+    required: false
+    default:
+      ${{ github.event.pull_request.number }}
+  repository:
+    description: |
+      The repository of the action that is publishing the report. Defaults to env.status-report-action-repository.
+    required: false
+
 outputs:
   comment-id:
-    description: The comment ID.
+    description: The comment ID of the status report.
     value: ${{ steps.upsert-comment.outputs.comment-id }}
 
 runs:
