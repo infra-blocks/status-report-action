@@ -4,10 +4,15 @@ description: |
   is updated in place everytime it is published.
 
 inputs:
+  mode:
+    description: |
+      The action mode. Either "upsert" or "clear".
+    required: false
+    default: upsert
   body:
     description: |
       The report content.
-    required: true
+    required: false
   issue-number:
     description: |
       The issue where to post the comment. This defaults to the PR number on pull request events,
@@ -28,10 +33,24 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: infer-variables
-      name: Infer variables
+    - id: parse-inputs
+      name: Parse inputs
       shell: bash
       run: |
+        valid_modes=("upsert" "clear")
+        if test -z "$(echo ${valid_modes[@]} | fgrep -w "${{ inputs.mode }}" )"; then
+          echo "Invalid mode: ${{ inputs.mode }}! Expected 'upsert' or 'clear'"
+          exit 1
+        fi
+        mode="${{ inputs.mode }}"
+        
+        if test "${mode}" = "upsert"; then
+          if test -z "${{ inputs.body }}"; then
+            echo "When mode is 'upsert' a body must be provided!"
+            exit 1
+          fi
+        fi
+        
         if test -z "${{ inputs.repository }}"; then
           repository="${{ env.status-report-action-repository }}"
         else
@@ -46,18 +65,34 @@ runs:
         title="${repository#*/}"
         link="https://github.com/${repository}"
         
-        echo "::debug::inferred repository ${repository}"
-        echo "::debug::inferred title ${title}"
-        echo "::debug::inferred link ${link}"
+        echo "mode=${mode}" >> "${GITHUB_OUTPUT}"
         echo "repository=${repository}" >> "${GITHUB_OUTPUT}"
         echo "title=${title}" >> "${GITHUB_OUTPUT}"
         echo "link=${link}" >> "${GITHUB_OUTPUT}"
     - id: upsert-comment
+      if: ${{ steps.parse-inputs.outputs.mode == 'upsert' }}
       uses: infrastructure-blocks/upsert-comment-action@v1
       with:
         issue-number: ${{ inputs.issue-number }}
         body: |
-          [${{ steps.infer-variables.outputs.title }}](${{ steps.infer-variables.outputs.link }}) Report
+          [${{ steps.parse-inputs.outputs.title }}](${{ steps.parse-inputs.outputs.link }}) Report
           ---
           ${{ inputs.body }}
-        matches: '^\[${{ steps.infer-variables.outputs.title }}\]\(${{ steps.infer-variables.outputs.link }}\) Report'
+        matches: '^\[${{ steps.parse-inputs.outputs.title }}\]\(${{ steps.parse-inputs.outputs.link }}\) Report'
+    - id: find-comment
+      if: ${{ steps.parse-inputs.outputs.mode == 'clear' }}
+      uses: peter-evans/find-comment@v2
+      with:
+        issue-number: ${{ inputs.issue-number }}
+        comment-author: github-actions[bot]
+        body-regex: '^\[${{ steps.parse-inputs.outputs.title }}\]\(${{ steps.parse-inputs.outputs.link }}\) Report'
+    - id: delete-comment
+      if: ${{ steps.parse-inputs.outputs.mode == 'clear' && steps.find-comment.outputs.comment-id != '' }}
+      uses: actions/github-script@v7
+      with:
+        script: | 
+          github.rest.issues.deleteComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            comment_id: "${{ steps.find-comment.outputs.comment-id }}"
+          })
