@@ -1,7 +1,7 @@
 # status-report-action
 
 A simple action to provide a status report as an issue comment. The status report is edited in place on every
-update.
+update. There is also an option to simply remove the report, if present.
 
 It provides a certain format and makes certain assumptions. It assumes the report is coming from an
 action or a workflow. The header of the report is the name of the action's repository, and it is linking
@@ -12,23 +12,28 @@ the repository input can also be passed through the `env` context. See usage bel
 
 ## Inputs
 
-|     Name     | Required | Description                                                                                                                   |
-|:------------:|:--------:|-------------------------------------------------------------------------------------------------------------------------------|
-|     body     |   true   | The report content.                                                                                                           |
-| issue-number |  false   | The issue where to post the comment. This defaults to the PR number on pull request events, otherwise, it should be provided. |
-|  repository  |  false   | The repository of the action that is publishing the report. Defaults to ${{ env.status-report-action-repository. }}           |
+|     Name     | Required | Description                                                                                                                                                                                                                                                                                                                                                   |
+|:------------:|:--------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|     mode     |  false   | The mode of report action. This can either be "clear" or "upsert". When "clear" is provided, the existing report is deleted, if it exists. It doesn't fail in the case that the report is missing. When "upsert" is provided, the `body` input must be provided and the comment is created if it doesn't exist or updated otherwise. It defaults to "upsert". |
+|     body     |  false   | The report content. This is required when `mode` is "upsert", irrelevant otherwise.                                                                                                                                                                                                                                                                           |
+| issue-number |  false   | The issue where to post the comment. This defaults to the PR number on pull request events, otherwise, it should be provided.                                                                                                                                                                                                                                 |
+|  repository  |  false   | The repository of the action that is publishing the report. Defaults to ${{ env.status-report-action-repository. }}                                                                                                                                                                                                                                           |
 
 ## Outputs
 
-|    Name    | Description                          |
-|:----------:|--------------------------------------|
-| comment-id | The comment ID of the status report. |
+|    Name    | Description                                                                                    |
+|:----------:|------------------------------------------------------------------------------------------------|
+| comment-id | The comment ID of the status report. When `mode` "clear" is selected, this is an empty string. |
 
 ## Permissions
+
+One of the below permissions should be provided, depending on if the status report will show on a pull request
+or on an issue.
 
 |     Scope     | Level | Reason                                      |
 |:-------------:|:-----:|---------------------------------------------|
 | pull-requests | write | Required to post comments on pull-requests. |
+|    issues     | write | Required to post comments on issues.        |
 
 ## Usage
 
