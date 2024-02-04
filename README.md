@@ -1,4 +1,7 @@
 # status-report-action
+[![Release](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/git-tag-semver-from-label.yml/badge.svg)](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/git-tag-semver-from-label.yml)
+[![Self Test](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/self-test.yml/badge.svg)](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/self-test.yml)
+[![Update](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/status-report-action/actions/workflows/update-from-template.yml)
 
 A simple action to provide a status report as an issue comment. The status report is edited in place on every
 update. There is also an option to simply remove the report, if present.
