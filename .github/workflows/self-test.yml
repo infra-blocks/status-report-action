@@ -21,8 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - if: ${{ github.event_name == 'pull_request' }}
+        name: Post PR comment
         id: pr-action
-        name: Post PR Comment
         uses: ./
         with:
           repository: ${{ github.repository }}
@@ -31,12 +31,14 @@ jobs:
             - [x] PR
             - [ ] Push
       - if: ${{ github.event_name == 'pull_request' }}
-        name: Show Outputs
+        name: Show outputs
+        env:
+          OUTPUTS: ${{ toJson(steps.pr-action.outputs) }}
         run: |
-          echo ${{ steps.pr-action.outputs.comment-id }}
+          echo "${OUTPUTS}"
       - if: ${{ github.event_name == 'push' }}
+        name: Post issue comment
         id: push-action
-        name: Post Issue Comment
         uses: ./
         with:
           issue-number: ${{ vars.TEST_ISSUE_PUSH_TESTS }}
@@ -45,20 +47,24 @@ jobs:
             - [ ] PR
             - [x] Push
       - if: ${{ github.event_name == 'push' }}
-        name: Show Outputs
+        name: Show outputs
+        env:
+          OUTPUTS: ${{ toJson(steps.push-action.outputs) }}
         run: |
-          echo "comment ID is: ${{ steps.push-action.outputs.comment-id }}"
+          echo "${OUTPUTS}"
       - if: ${{ github.event_name == 'push' }}
+        name: Clear missing report
         id: clear-missing-report
-        name: Clear Missing Report
         uses: ./
         with:
           mode: clear
           issue-number: ${{ vars.TEST_ISSUE_CLEAR_TESTS }}
       - if: ${{ github.event_name == 'push' }}
         name: Show outputs
+        env:
+          OUTPUTS: ${{ toJson(steps.clear-missing-report.outputs) }}
         run: |
-          echo -e "${{ toJson(steps.clear-missing-report.outputs) }}"
+          echo "${OUTPUTS}"
       - if: ${{ github.event_name == 'push' }}
         name: Post Issue Comment For Removal
         uses: ./
@@ -67,13 +73,15 @@ jobs:
           body: |
             Look at me! You ain't gonna sees me for long!
       - if: ${{ github.event_name == 'push' }}
+        name: Clear existing report
         id: clear-existing-report
-        name: Clear Existing Report
         uses: ./
         with:
           mode: clear
           issue-number: ${{ vars.TEST_ISSUE_CLEAR_TESTS }}
       - if: ${{ github.event_name == 'push' }}
         name: Show outputs
+        env:
+          OUTPUTS: ${{ toJson(steps.clear-existing-report.outputs) }}
         run: |
-          echo -e "${{ toJson(steps.clear-existing-report.outputs) }}"
+          echo "${OUTPUTS}"
