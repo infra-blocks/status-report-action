@@ -103,7 +103,7 @@ jobs:
     steps:
       # Gets the current PR associated with GITHUB_SHA
       - id: get-current-pr
-        uses: 8BitJonny/gh-get-current-pr@2.2.0
+        uses: infrastructure-blocks/get-current-pull-request-action@v1
       - uses: infrastructure-blocks/status-report-action@v1
         with:
           issue-number: ${{ steps.get-current-pr.outputs.number }}
