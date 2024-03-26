@@ -37,6 +37,10 @@ runs:
       name: Parse inputs
       shell: bash
       run: |
+        if test "${{ runner.debug }}" = "1"; then
+          set -x
+        fi
+
         valid_modes=("upsert" "clear")
         if test -z "$(echo ${valid_modes[@]} | fgrep -w "${{ inputs.mode }}" )"; then
           echo "Invalid mode: ${{ inputs.mode }}! Expected 'upsert' or 'clear'"
