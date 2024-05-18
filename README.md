@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 # status-report-action
 [![Release](https://github.com/infra-blocks/status-report-action/actions/workflows/git-tag-semver-from-label.yml/badge.svg)](https://github.com/infra-blocks/status-report-action/actions/workflows/git-tag-semver-from-label.yml)
 [![Self Test](https://github.com/infra-blocks/status-report-action/actions/workflows/self-test.yml/badge.svg)](https://github.com/infra-blocks/status-report-action/actions/workflows/self-test.yml)
 [![Update From Template](https://github.com/infra-blocks/status-report-action/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infra-blocks/status-report-action/actions/workflows/update-from-template.yml)
+=======
+# composite-action-template
+[![Release](https://github.com/infra-blocks/composite-action-template/actions/workflows/git-tag-semver-from-label.yml/badge.svg)](https://github.com/infra-blocks/composite-action-template/actions/workflows/git-tag-semver-from-label.yml)
+[![Self Test](https://github.com/infra-blocks/composite-action-template/actions/workflows/self-test.yml/badge.svg)](https://github.com/infra-blocks/composite-action-template/actions/workflows/self-test.yml)
+[![Update Template Instances](https://github.com/infra-blocks/composite-action-template/actions/workflows/trigger-update-from-template.yml/badge.svg)](https://github.com/infra-blocks/composite-action-template/actions/workflows/trigger-update-from-template.yml)
+>>>>>>> template/master
 
 A simple action to provide a status report as an issue comment. The status report is edited in place on every
 update. There is also an option to simply remove the report, if present.
@@ -101,6 +108,7 @@ permissions:
 jobs:
   status-report:
     steps:
+<<<<<<< HEAD
       # Gets the current PR associated with GITHUB_SHA
       - id: get-current-pr
         uses: infra-blocks/get-current-pull-request-action@v1
@@ -110,4 +118,7 @@ jobs:
           repository: captain-shitcoin/shitcoin-repo
           body: |
             :+1: My shitcoin is when there is a PR!
+=======
+      - uses: infra-blocks/composite-action-template@v1
+>>>>>>> template/master
 ```
