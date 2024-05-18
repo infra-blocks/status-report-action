@@ -33,7 +33,7 @@ runs:
   steps:
     - if: ${{ inputs.issue-number == '' }}
       id: current-pr
-      uses: infrastructure-blocks/get-current-pull-request-action@v1
+      uses: infra-blocks/get-current-pull-request-action@v1
     - id: parse-inputs
       name: Parse inputs
       shell: bash
@@ -83,7 +83,7 @@ runs:
         echo "issue-number=${issue_number}" >> "${GITHUB_OUTPUT}"
     - id: upsert-comment
       if: ${{ steps.parse-inputs.outputs.mode == 'upsert' }}
-      uses: infrastructure-blocks/upsert-comment-action@v1
+      uses: infra-blocks/upsert-comment-action@v1
       with:
         issue-number: ${{ steps.parse-inputs.outputs.issue-number }}
         body: |
